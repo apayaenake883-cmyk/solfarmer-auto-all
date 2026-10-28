@@ -1,0 +1,5 @@
+# State & secret — jangan pernah masuk repo
+sf-state/
+.solfarmer*
+__pycache__/
+*.pyc

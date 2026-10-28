@@ -1,0 +1,61 @@
+name: SolFarmer Auto All
+
+on:
+  schedule:
+    - cron: '*/2 * * * *'   # tiap ~2 menit: jalankan 1 siklus klaim
+    - cron: '0 3 * * 1'     # keep-alive mingguan (Senin 03:00 UTC) anti nonaktif 60 hari
+  workflow_dispatch: {}     # tombol "Run workflow" untuk jalankan manual
+
+permissions:
+  contents: write           # untuk commit keep-alive
+
+concurrency:
+  group: sf-cycle
+  cancel-in-progress: false
+
+jobs:
+  keepalive:
+    if: github.event_name == 'schedule' && github.event.schedule == '0 3 * * 1'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Commit keep-alive
+        run: |
+          echo "last-keep-alive: $(date -u +%FT%TZ)" > KEEPALIVE.md
+          git config user.name "keepalive-bot"
+          git config user.email "keepalive@users.noreply.github.com"
+          git add KEEPALIVE.md
+          git commit -m "chore: keep-alive [skip ci]" || true
+          git push || true
+
+  cycle:
+    if: github.event_name != 'schedule' || github.event.schedule == '*/2 * * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # State sesi (token yang berputar) dititipkan antar run lewat cache.
+      # Key unik tiap run → cache selalu ditulis baru; restore ambil yg paling anyar.
+      - uses: actions/cache@v4
+        with:
+          path: sf-state
+          key: sf-state-${{ github.run_id }}
+          restore-keys: |
+            sf-state-
+
+      - name: Siapkan Python + requests
+        run: python3 -m pip install --quiet requests
+
+      - name: Jalankan 1 siklus SolFarmer
+        env:
+          SOLFARMER_ONCE: '1'
+          SF_SESSION: ${{ secrets.SF_SESSION }}
+          SF_LOGIN: ${{ secrets.SF_LOGIN }}
+          SF_RELOGIN_STATE: ${{ secrets.SF_RELOGIN_STATE }}
+          SF_WD_LOG: ${{ secrets.SF_WD_LOG }}
+          # Opsional — isi lewat Settings → Secrets and variables → Actions:
+          SOLFARMER_WD_CODE: ${{ secrets.SOLFARMER_WD_CODE }}
+          SOLFARMER_IMAP_USER: ${{ secrets.SOLFARMER_IMAP_USER }}
+          SOLFARMER_IMAP_PASS: ${{ secrets.SOLFARMER_IMAP_PASS }}
+        run: bash runner.sh
