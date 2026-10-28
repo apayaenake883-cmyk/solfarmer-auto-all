@@ -54,6 +54,7 @@ jobs:
           SF_LOGIN: ${{ secrets.SF_LOGIN }}
           SF_RELOGIN_STATE: ${{ secrets.SF_RELOGIN_STATE }}
           SF_WD_LOG: ${{ secrets.SF_WD_LOG }}
+          SOLFARMER_WD_AMOUNT: '0.1'
           # Opsional — isi lewat Settings → Secrets and variables → Actions:
           SOLFARMER_WD_CODE: ${{ secrets.SOLFARMER_WD_CODE }}
           SOLFARMER_IMAP_USER: ${{ secrets.SOLFARMER_IMAP_USER }}
