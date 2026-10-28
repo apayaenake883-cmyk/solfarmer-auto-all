@@ -28,13 +28,19 @@ Jadwal: tiap ±2 menit satu siklus klaim. Tanpa VPS, tanpa kartu.
    Jalankan manual sekali dengan tombol **Run workflow** buat tes.
 
 ## Konfirmasi withdraw (kode email)
-Kalau saldo mencukupi, workflow akan minta `SOLFARMER_WD_CODE`.
-Cara pakai: ambil kode 6 huruf dari email solfarmer →
-**Settings → Secrets → New secret**: nama `SOLFARMER_WD_CODE`, isi kodenya →
-**Run workflow** manual. Habis konfirmasi, hapus/ubah secret itu biar tidak kepakai lagi.
+Saat saldo mencukupi (≥ 0.1 SOL), bot otomatis kirim permintaan wd — kode
+konfirmasinya dikirim ke email kamu. Konfirmasi cuma butuh **1 langkah**:
 
-Alternatif hands-off: set secret `SOLFARMER_IMAP_PASS` (Gmail app password) +
-opsional `SOLFARMER_IMAP_USER` — kode email dibaca otomatis tiap siklus.
+1. Buka email solfarmer, salin kode 6 huruf (atau link konfirmasinya).
+2. Buka tab **Actions** di repo ini → pilih workflow **SolFarmer Auto All** →
+   tombol **Run workflow** → tempel kode di kolom `wd_code` → Run.
+
+Bot lanjut konfirmasi + catat ke riwayat sendiri. Cron 2-menitan tidak terganggu —
+pending wd menunggu sampai 30 menit sampai kamu sempat tempel kodenya.
+
+Alternatif hands-off penuh: set secret `SOLFARMER_IMAP_PASS` (Gmail app password) +
+opsional `SOLFARMER_IMAP_USER` — kode email dibaca otomatis tiap siklus, tanpa
+langkah manual sama sekali.
 
 ## Catatan keamanan
 - Repo ini PUBLIK dan kode TIDAK berisi kredensial apa pun — semua rahasia hidup di

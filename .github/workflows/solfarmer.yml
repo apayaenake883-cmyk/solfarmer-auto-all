@@ -4,7 +4,12 @@ on:
   schedule:
     - cron: '*/2 * * * *'   # tiap ~2 menit: jalankan 1 siklus klaim
     - cron: '0 3 * * 1'     # keep-alive mingguan (Senin 03:00 UTC) anti nonaktif 60 hari
-  workflow_dispatch: {}     # tombol "Run workflow" untuk jalankan manual
+  workflow_dispatch:        # tombol "Run workflow" — juga dipakai konfirmasi wd
+    inputs:
+      wd_code:
+        description: 'Kode konfirmasi withdraw dari email (6 huruf / link). Kosongkan kalau tidak ada wd tertunda.'
+        required: false
+        default: ''
 
 permissions:
   contents: write           # untuk commit keep-alive
@@ -55,8 +60,9 @@ jobs:
           SF_RELOGIN_STATE: ${{ secrets.SF_RELOGIN_STATE }}
           SF_WD_LOG: ${{ secrets.SF_WD_LOG }}
           SOLFARMER_WD_AMOUNT: '0.1'
-          # Opsional — isi lewat Settings → Secrets and variables → Actions:
-          SOLFARMER_WD_CODE: ${{ secrets.SOLFARMER_WD_CODE }}
+          # Kode konfirmasi wd: input "wd_code" di tombol Run workflow (utama),
+          # fallback secret SOLFARMER_WD_CODE (opsional, jarang dipakai).
+          SOLFARMER_WD_CODE: ${{ inputs.wd_code || secrets.SOLFARMER_WD_CODE }}
           SOLFARMER_IMAP_USER: ${{ secrets.SOLFARMER_IMAP_USER }}
           SOLFARMER_IMAP_PASS: ${{ secrets.SOLFARMER_IMAP_PASS }}
         run: bash runner.sh
